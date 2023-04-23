@@ -1,1 +1,1 @@
-# snake-game-java
+# snake game written in java for university assignment
