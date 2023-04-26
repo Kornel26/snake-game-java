@@ -52,7 +52,7 @@ public class Game extends JPanel implements ActionListener {
     private final int stoneCount = 3;
     private ArrayList<Point> rocks;
     private Point apple;
-    private ArrayList<Point> sneak;
+    private ArrayList<Point> snake;
     private char direction;
     private char[] directions = {'w', 'a', 's', 'd'};
 
@@ -83,7 +83,7 @@ public class Game extends JPanel implements ActionListener {
         } catch (IOException ex) {
             Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.generateSneak();
+        this.generateSnake();
         this.generateRocks();
         this.newApple();
         this.direction = this.directions[this.getRandom(0, 4)];
@@ -119,7 +119,7 @@ public class Game extends JPanel implements ActionListener {
      * If DEBUG mode is enabled, it draws a grid of rectangles representing the
      * game board. If the game is over, it draws the game over screen with the
      * final score and "Game over!" text. It draws the apple as a red oval,
-     * stones as gray rectangles, and the sneak (snake) as orange and green
+     * stones as gray rectangles, and the snake (snake) as orange and green
      * rectangles. It draws the current score and elapsed time using the
      * baseFont and dateFormat objects. The fillRect() and fillOval() methods of
      * the Graphics object are used to draw the shapes at the appropriate
@@ -137,7 +137,7 @@ public class Game extends JPanel implements ActionListener {
                 }
             }
         }
-        String scoreText = "Score: " + (this.sneak.size() - 2);
+        String scoreText = "Score: " + (this.snake.size() - 2);
         if (this.gameOver) {
             //draw score and time
             g.setColor(Color.BLACK);
@@ -157,12 +157,12 @@ public class Game extends JPanel implements ActionListener {
         for (int i = 0; i < this.stoneCount; i++) {
             g.fillRect(this.rocks.get(i).x * this.tileWidth, this.rocks.get(i).y * this.tileWidth, this.tileWidth, this.tileWidth);
         }
-        //draw sneak
+        //draw snake
         g.setColor(Color.ORANGE);
-        g.fillRect(this.sneak.get(0).x * this.tileWidth, this.sneak.get(0).y * this.tileWidth, this.tileWidth, this.tileWidth);
+        g.fillRect(this.snake.get(0).x * this.tileWidth, this.snake.get(0).y * this.tileWidth, this.tileWidth, this.tileWidth);
         g.setColor(Color.green);
-        for (int i = 1; i < this.sneak.size(); i++) {
-            g.fillRect(this.sneak.get(i).x * this.tileWidth, this.sneak.get(i).y * this.tileWidth, this.tileWidth, this.tileWidth);
+        for (int i = 1; i < this.snake.size(); i++) {
+            g.fillRect(this.snake.get(i).x * this.tileWidth, this.snake.get(i).y * this.tileWidth, this.tileWidth, this.tileWidth);
         }
 
         //draw score and time
@@ -180,7 +180,7 @@ public class Game extends JPanel implements ActionListener {
      * save their result to a database using the saveToDatabase() method.
      */
     private void showGameOverDialog() {
-        final int score = this.sneak.size() - 2;
+        final int score = this.snake.size() - 2;
         final String result = JOptionPane.showInputDialog(null, "Congratulations!\nYour final score was: " + score, "Save your result!", JOptionPane.INFORMATION_MESSAGE);
         if (result != null) {
             this.saveToDatabase(result, score);
@@ -201,7 +201,7 @@ public class Game extends JPanel implements ActionListener {
     }
 
     /**
-     * The generateSneak() method initializes the sneak ArrayList with two Point
+     * The generateSnake() method initializes the snake ArrayList with two Point
      * objects representing the starting position of the snake. The starting
      * position of the snake is calculated as follows:
      *
@@ -214,14 +214,14 @@ public class Game extends JPanel implements ActionListener {
      * vertically.
      *
      * Two Point objects with the x and y values calculated above are then added
-     * to the sneak ArrayList.
+     * to the snake ArrayList.
      */
-    private void generateSneak() {
-        this.sneak = new ArrayList<Point>();
+    private void generateSnake() {
+        this.snake = new ArrayList<Point>();
         int x = (n / 2) - 1;
         int y = (n / 2) - 1;
-        this.sneak.add(new Point(x, y));
-        this.sneak.add(new Point(x, y));
+        this.snake.add(new Point(x, y));
+        this.snake.add(new Point(x, y));
     }
 
     /**
@@ -261,8 +261,8 @@ public class Game extends JPanel implements ActionListener {
                 }
             }
         }
-        if (this.sneak != null) {
-            for (Point part : sneak) {
+        if (this.snake != null) {
+            for (Point part : snake) {
                 if (part.x == x && part.y == y) {
                     return true;
                 }
@@ -308,11 +308,11 @@ public class Game extends JPanel implements ActionListener {
      * based on the direction of movement.
      */
     private void move() {
-        this.sneak.remove(this.sneak.size() - 1);
-        Point prev = this.sneak.get(0);
+        this.snake.remove(this.snake.size() - 1);
+        Point prev = this.snake.get(0);
         int x = (this.direction == 'a') ? -1 : (this.direction == 'd' ? 1 : 0);
         int y = (this.direction == 'w') ? -1 : (this.direction == 's' ? 1 : 0);
-        this.sneak.add(0, new Point(prev.x + x, prev.y + y));
+        this.snake.add(0, new Point(prev.x + x, prev.y + y));
     }
 
     /**
@@ -320,14 +320,14 @@ public class Game extends JPanel implements ActionListener {
      * walls, rocks, or itself.
      */
     private void isGameOver() {
-        Point head = this.sneak.get(0);
+        Point head = this.snake.get(0);
         if (head.x < 0 || head.x > n || head.y < 0 || head.y > n) {
             this.gameOver = true;
             return;
         }
 
-        for (int i = this.sneak.size() - 1; i > 0; i--) {
-            if (head.x == this.sneak.get(i).x && head.y == this.sneak.get(i).y) {
+        for (int i = this.snake.size() - 1; i > 0; i--) {
+            if (head.x == this.snake.get(i).x && head.y == this.snake.get(i).y) {
                 this.gameOver = true;
                 return;
             }
@@ -343,16 +343,16 @@ public class Game extends JPanel implements ActionListener {
 
     /**
      * Checks if the snake has eaten the apple, and if so, calls the
-     * incrementSneak() and newApple() methods to increase the length of the
+     * incrementSnake() and newApple() methods to increase the length of the
      * snake and create a new apple.
      */
     private void isAppleEaten() {
         if (this.apple == null) {
             return;
         }
-        Point head = this.sneak.get(0);
+        Point head = this.snake.get(0);
         if (this.apple.x == head.x && this.apple.y == head.y) {
-            this.incrementSneak();
+            this.incrementSnake();
             this.newApple();
         }
     }
@@ -360,9 +360,9 @@ public class Game extends JPanel implements ActionListener {
     /**
      * This function creates a new point and adds it to the end of the snake.
      */
-    private void incrementSneak() {
-        Point prev = this.sneak.get(this.sneak.size() - 1);
-        this.sneak.add(new Point(prev.x, prev.y));
+    private void incrementSnake() {
+        Point prev = this.snake.get(this.snake.size() - 1);
+        this.snake.add(new Point(prev.x, prev.y));
     }
 
     /**
